@@ -1,0 +1,3 @@
+OpenFreeMap liberty style / tiles https://tiles.openfreemap.org/planet/20261004_113936_pt/{z}/{x}/{y}.pbf
+範囲 35.665,139.7,35.728,139.778 / ズーム13〜14
+© OpenFreeMap © OpenMapTiles © OpenStreetMap contributors (ODbL)

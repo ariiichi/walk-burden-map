@@ -1,0 +1,18 @@
+.DS_Store
+.AppleDouble
+__pycache__/
+*.py[cod]
+.venv/
+venv/
+node_modules/
+.env
+.env.*
+!.env.example
+*.log
+*.tmp
+*.bak
+exports/
+.aws/
+
+# 取得した生データ（容量が大きいため非同梱。取得条件は docs/ と data/build_*.py を参照）
+data/raw/

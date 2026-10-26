@@ -1,0 +1,49 @@
+<!doctype html>
+<html lang="ja">
+<head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>毎日の登りマップ | Walk Burden Map</title><link rel="stylesheet" href="vendor/leaflet.css"><link rel="stylesheet" href="vendor/maplibre/maplibre-gl.css"><link rel="stylesheet" href="style.css"></head>
+<body>
+<div id="map" role="region" aria-label="駅・出口の地表標高と坂・駅構内を表示する地図"></div>
+<header class="map-heading"><span id="heading-eyebrow">WALK BURDEN MAP</span><h1 id="heading-title">毎日の登り。</h1><p id="heading-sub">駅徒歩の分数に、帰り道の高低差を。</p></header>
+<button id="panel-toggle" class="panel-toggle" aria-controls="panel" aria-expanded="true">パネルを閉じる ›</button>
+<aside id="panel" aria-label="駅の選択と表示設定">
+<div class="panel-intro"><h2>駅の出口と、周辺の坂を知る</h2><p>対応する96駅群の周辺の坂、出口の地表標高、OSMに収録された駅構内を表示します。駅は路線から選べます。</p></div>
+<section><h3>表示するもの</h3><div id="switches">
+<label><span>駅名 <small>広域では間引いて表示</small></span><input type="checkbox" id="stationNames" checked role="switch"></label>
+<label><span>駅出入口・駅代表点の標高</span><input type="checkbox" id="stations" checked role="switch"></label>
+<label><span>坂道 <small>道路の勾配</small></span><input type="checkbox" id="slopes" checked role="switch"></label>
+<label><span>地下鉄 <small>線路・ホーム・出入口（OSM）</small></span><input type="checkbox" id="subway" checked role="switch"></label>
+<label class="sub-level"><span><small>地下鉄の階</small></span><select id="subway-level" aria-label="表示する地下鉄の階"><option value="all">すべての階</option><option value="above">地上・高架</option><option value="b1">地下1階</option><option value="b2">地下2階</option><option value="b3">地下3階より深い</option></select></label>
+</div></section>
+<p id="area-status" class="small" aria-live="polite">範囲データを準備中</p>
+<section id="interior-panel" aria-labelledby="interior-heading">
+<h3 id="interior-heading">駅構内レイヤー <small>OSM収録分</small></h3>
+<label class="interior-switch"><span>街の地図に構内を重ねる</span><input type="checkbox" id="interiors" checked role="switch"></label>
+<div class="interior-controls">
+<label for="interior-line">路線</label><select id="interior-line"></select>
+<label for="interior-station">駅</label><select id="interior-station"></select>
+<label for="interior-level">階</label><select id="interior-level"></select>
+</div>
+<p id="interior-availability" class="small" aria-live="polite"></p>
+<label class="small"><input type="checkbox" id="interior-exits" checked> 地表出口を重ねる（階とは独立）</label>
+<button id="interior-focus" class="primary">選んだ駅を拡大</button>
+<button id="btn3d-panel" class="primary">立体表示（ホームの階を見る）</button>
+<p id="interior-status" class="small" aria-live="polite"></p>
+<div class="interior-legend"><span><i class="platform"></i>ホーム（路線色／未詳は灰色）</span><span><i class="corridor"></i>通路</span><span>▥ 階段</span><span>EV 出入口</span></div>
+<p id="interior-warning" class="small"></p>
+<details><summary>収録範囲と未収録の設備</summary><div id="interior-coverage" class="small"></div><p class="small">階はOSMのlevel値を基本とします。JRの地上・高架ホームには近傍線路から推定した模式階を含み、原levelは詳細に表示します。地表の標高から地下の深さは計算しません。改札内外・通行可否・駅構内の経路は判定しません。駅ごとの収録状況を表示します。未収録は設備がないという意味ではありません。</p><a href="README.md#出典・ライセンス">情報源と利用条件</a></details>
+</section>
+<section><h3>表示の読み方</h3><p class="small">坂道の色は約20m区間の道路勾配を示します。出口の標高は地表の高さです。橋・擁壁・段差などで、実際の歩行面と地表標高が異なる場合があります。</p><p class="small">地下鉄の階はOSMのタグによるものです。ホームまでの距離は直線の目安で、実際の歩行距離・時間ではありません。</p><a href="README.md">使い方・計算上の注意</a> · <a href="ATTRIBUTION.md">データ出典・ライセンス</a></section>
+<footer>標高：国土地理院の標高タイルを加工<br>道路・地物：© OpenStreetMap contributors / ODbL<br>背景：OpenFreeMap・OpenMapTiles ／ 描画：Leaflet・MapLibre</footer>
+</aside>
+<div class="slope-key" id="slope-key"><b>坂道（勾配）</b><span><i style="background:#f08fb0"></i>4〜6%</span><span><i style="background:#d6336c"></i>6〜9%</span><span><i style="background:#8c0f45"></i>9%以上</span></div>
+<div class="subway-key" id="subway-key"><b>地下鉄</b><span><i class="solid"></i>地上・高架</span><span><i class="dash"></i>地下</span><span><i class="plat"></i>ホーム</span><span><i class="exit"></i>出入口</span><small>ズーム15以上で表示。通路はさらに拡大で表示</small></div>
+<button id="btn3d" class="btn3d">立体表示</button>
+<div id="map3d-wrap" hidden><div id="map3d"></div>
+<div id="v3d-location" class="v3d-location" role="status"></div>
+<details class="v3d-note"><summary>凡例・高さの設定</summary><div class="v3d-note-content"><b>高さ・深さは模式的な表示です。</b>1階約5mを誇張し、地上・高架のホームは地面より上に描きます。level 0も見やすく浮かせています。JRの模式階と、出口が結ぶ階にはOSMからの推定を含みます。実測の床高ではありません。<div id="v3d-legend-levels" class="v3d-levels"></div><label class="v3d-slider">高さの誇張 <input id="v3d-ex" type="range" min="1" max="6" step="1" value="3"> <span id="v3d-exv">×3</span></label><div id="v3d-exits" class="v3d-exits"></div><div class="v3d-keys"><span><i style="background:#c8c5b3"></i>地上の道路（半透明の地面の上）</span><span><i style="background:#d6336c"></i>坂（勾配）</span><span><i style="background:#6a5acd"></i>ホーム</span><span><i style="background:#3a6a9c"></i>通路</span><span><i style="background:#b8692a"></i>階段</span><span><i style="background:#ff7800"></i>出口の縦線</span></div></div></details>
+<button id="v3d-back" class="v3d-back">← 平面に戻る</button><div id="v3d-err" class="v3d-err" hidden>この端末では立体表示（WebGL）を開始できませんでした。</div></div>
+<div class="map-status" id="map-status" aria-live="polite">公開道路データを表示</div>
+<div class="north" aria-label="北">N ↑</div>
+<noscript><div class="error">この地図を表示するにはJavaScriptを有効にしてください。</div></noscript>
+<script src="vendor/leaflet.js"></script><script src="vendor/maplibre/maplibre-gl.js"></script><script src="vendor/maplibre/leaflet-maplibre-gl.js"></script><script src="data.js"></script><script src="area-loader.js"></script><script src="station-interiors.js"></script><script src="walk3d.js"></script><script src="station-labels.js"></script><script src="app.js"></script>
+</body></html>
